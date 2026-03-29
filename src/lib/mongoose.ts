@@ -13,6 +13,7 @@ import mongoose from 'mongoose';
  * Custom modules
  */
 import config from '@/config/index';
+import {logger} from '@/lib/winston';
 
 /**
  * Types
@@ -49,7 +50,7 @@ export const connectToDatabase = async(): Promise<void> =>{
     }
     try{
         await mongoose.connect(config.MONGO_URI,clientOptions);
-        console.log('Connected to databse successfully',{
+        logger.info('Connected to databse successfully',{
         uri: config.MONGO_URI,
         options: clientOptions
         });
@@ -57,7 +58,7 @@ export const connectToDatabase = async(): Promise<void> =>{
         if (err instanceof Error){
             throw err;
         }
-        console.log('Error connectiong to the databse', err)
+        logger.error('Error connectiong to the databse', err)
     }
 }
 
@@ -73,7 +74,7 @@ export const connectToDatabase = async(): Promise<void> =>{
 export const disconnectFromDatabase = async(): Promise<void> =>{
     try{
         await  mongoose.disconnect();
-        console.log('Disconnected from the datase successfully',{
+        logger.info('Disconnected from the datase successfully',{
             uri: config.MONGO_URI,
             options: clientOptions
         })
@@ -81,6 +82,6 @@ export const disconnectFromDatabase = async(): Promise<void> =>{
         if(err instanceof Error){
             throw new Error(err.message)
         }
-        console.log('Error disconnecting from the database',err)
+        logger.error('Error disconnecting from the database',err)
     }
-}
+};
