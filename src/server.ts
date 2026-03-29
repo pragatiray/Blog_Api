@@ -10,6 +10,13 @@ import helmet from 'helmet';
  * Custom modules
  */
 import config from '@/config';
+import limiter from '@/lib/express_rate_limit';
+import { connectToDatabase ,disconnectFromDatabase} from './lib/mongoose';
+
+/**
+ * Router
+ */
+import v1Routes from '@/route/v1';
 
 /**
  * Types
@@ -32,7 +39,6 @@ const corsOptions: CorsOptions = {
             false
            )
         }
-        console.log(`CORS Error: ${origin} is not allowed by CORS`)
     },
 }
 //Apply CORS middleware
@@ -59,13 +65,53 @@ app.use(
 app.use(helmet())
 
 //Apply rate limiting middleware to prevent excessive requests and enchance security 
+app.use(limiter);
 
-app.get('/',(req,res) =>{
-    res.json({
-        message: 'Hello World'
-    })
-})
 
-app.listen(config.PORT,() => {
-    console.log(`Server running : http://localhost:${config.PORT}`);
-})
+
+(async () => {
+    try {
+        await connectToDatabase();
+        app.use('/api/v1', v1Routes);
+
+        console.log('PORT IS ', config.PORT);
+
+        app.listen(config.PORT, () => {
+            console.log(`Server running : http://localhost:${config.PORT}`);
+        });
+    } catch (err) {
+        console.log('Failed to start the server', err);
+    }
+})();
+
+/**
+ * Handles server shutdown gracefully by disconnecting from the database
+ * 
+ * - Attemot to disconnect from the database before shutting doiwn the server
+ * 
+ * - Logs a success message if the disconnection is successful
+ * - If an error occurs during disconnection, it is logged to the console.
+ * - Exists the process with status code
+ */
+
+const handleServerShutdown = async() => {
+    try{
+        await disconnectFromDatabase();
+        console.log('Server SHUTDOWN')
+        process.exit(0);
+    } catch (err){
+        console.log('Error during server shutdown',err);
+    }
+}
+/**
+ * Listens for termination signals(`SIGTERM` and `SIGINT`)
+ * 
+ * - `SIGTERM` is typically sent when stopping a process (e.g., `kill' 
+ * command or container shutdown).
+ * - `SIGINT` is triggered when the user interrupts the process( e.g., 
+ * processing `Ctrl + C`).
+ * - When either signal is received, `handleServerShutdown` IS executed 
+ * to ensure proper cleanup
+ */
+process. on('SIGTERM',handleServerShutdown);
+process.on ('SIGINT',handleServerShutdown);
