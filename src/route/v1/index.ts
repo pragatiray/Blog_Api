@@ -12,6 +12,11 @@ import { timeStamp } from 'node:console';
 const router = Router();
 
 /**
+ * Routes
+ */
+import authRoutes from '@/route/v1/auth';
+
+/**
  * Root route
  */
 router.get('/',(req,res)=>{
@@ -22,6 +27,8 @@ router.get('/',(req,res)=>{
         docs: "https://docs.blog-api.codewithsadee.com",
         timeStamp: new Date().toISOString()
     })
-})
+});
+
+router.use('/auth', authRoutes);
 
 export default router;
