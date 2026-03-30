@@ -6,30 +6,35 @@
 /**
  * Node modules
  */
-import { Schema, model } from "mongoose";
-import { timeStamp } from "node:console";
+import { Schema, model, Model } from "mongoose";
+/**
+ * Custom modules
+ */
+import bcrypt from "bcrypt";
 
-export interface IUser{
-    username: string;
-    email: string;
-    password: string;
-    role: 'admin' | 'user';
-    firstName ?: string;
-    lastName ?: string;
-    socialLinks?: {
-        website?: string;
-        facebook?: string;
-        instagram?: string;
-        linkedin?: string
-        x?: string;
-        youtube?: string;
-    }
+/**
+ * User interface
+ */
+export interface IUser {
+  username: string;
+  email: string;
+  password: string;
+  role: 'admin' | 'user';
+  firstName?: string;
+  lastName?: string;
+  socialLinks?: {
+    website?: string;
+    facebook?: string;
+    instagram?: string;
+    linkedin?: string;
+    x?: string;
+    youtube?: string;
+  };
 }
+
 /**
  * User schema
  */
-
-
 const userSchema = new Schema<IUser>(
   {
     username: {
@@ -77,30 +82,15 @@ const userSchema = new Schema<IUser>(
     },
 
     socialLinks: {
-      website: {
-        type: String,
-        maxLength: [100, 'Website url must be below 100 characters']
+      type: {
+        website: { type: String, maxLength: [100, 'Website URL must be below 100 characters'] },
+        facebook: { type: String, maxLength: [100, 'Facebook URL must be below 100 characters'] },
+        instagram: { type: String, maxLength: [100, 'Instagram URL must be below 100 characters'] },
+        linkedin: { type: String, maxLength: [100, 'LinkedIn URL must be below 100 characters'] },
+        x: { type: String, maxLength: [100, 'X URL must be below 100 characters'] },
+        youtube: { type: String, maxLength: [100, 'YouTube URL must be below 100 characters'] },
       },
-      facebook: {
-        type: String,
-        maxLength: [100, 'Facebook profile url must be below 100 characters']
-      },
-      instagram: {
-        type: String,
-        maxLength: [100, 'Instagram profile url must be below 100 characters']
-      },
-      linkedin: {
-        type: String,
-        maxLength: [100, 'LinkedIn profile url must be below 100 characters']
-      },
-      x: {
-        type: String,
-        maxLength: [100, 'X profile url must be below 100 characters']
-      },
-      youtube: {
-        type: String,
-        maxLength: [100, 'Youtube channel url must be below 100 characters']
-      }
+      default: {}
     }
   },
   {
@@ -108,5 +98,19 @@ const userSchema = new Schema<IUser>(
   }
 );
 
+/**
+ * Pre-save hook: hash password before saving
+ */
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) {
+    return;
+  }
+  this.password = await bcrypt.hash(this.password, 10);
+});
 
-export default model <IUser>('User', userSchema);
+/**
+ * Mongoose model
+ */
+const User: Model<IUser> = model<IUser>('User', userSchema);
+
+export default User;

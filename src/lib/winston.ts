@@ -32,7 +32,7 @@ if (config.NODE_ENV !== 'production') {
               ? `\n${JSON.stringify(metadata, null, 2)}`
               : '';
 
-          return `${timestamp} [${level.toUpperCase()}]: ${message}${metaStr}`;
+          return `${timestamp} [${level}]: ${message}${metaStr}`;
         })
       ),
     })
