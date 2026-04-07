@@ -7,11 +7,14 @@
  * Node modules
  */
 import { Router } from 'express';
-import { body } from  'express-validator';
+import { body,cookie } from  'express-validator';
 /**
  * Controller
  */
 import register  from '@/controllers/v1/auth/register';
+import login from '@/controllers/v1/auth/login';
+import refreshToken from '@/controllers/v1/auth/refreshToken';
+import logout from '@/controllers/v1/auth/logout';
 /**
  * Middlewares
  */
@@ -20,7 +23,8 @@ import validationError from '@/middlewares/validationError';
 /**
  * Models
  */
-import User from '@/models/v1/user';
+import User from '@/models/v1/user'; 
+import authenticate from '@/controllers/v1/auth/authenticate';
 
 const router = Router();
 
@@ -54,5 +58,17 @@ router.post(
   validationError,
   register
 );
+router.post('/login',login);
 
+router.post('/refresh-token',
+    cookie('refreshToken')
+    .notEmpty()
+    .withMessage('Refresh token required')
+    .isJWT()
+    .withMessage('Invalid refresh token'),
+    validationError,  
+    refreshToken);
+router.post('/logout',
+    authenticate,
+    logout);
 export default router;

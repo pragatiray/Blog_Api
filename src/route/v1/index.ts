@@ -15,6 +15,7 @@ const router = Router();
  * Routes
  */
 import authRoutes from '@/route/v1/auth';
+import blogRoutes from '@/route/v1/blog';
 
 /**
  * Root route
@@ -30,5 +31,6 @@ router.get('/',(req,res)=>{
 });
 
 router.use('/auth', authRoutes);
+router.use('/blogs', blogRoutes);
 
 export default router;

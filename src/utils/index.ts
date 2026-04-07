@@ -13,3 +13,10 @@ export const genUsername = (): string =>{
     const username = usernamePrefix + randomChars;
     return username;
 }
+
+export const slugify = (text: string): string => {
+  return text
+    .toLowerCase()
+    .replace(/[^\w ]+/g, '')
+    .replace(/ +/g, '-');
+}
